@@ -1,0 +1,4 @@
+reload-message: "&aPlugin config reloaded!"
+jump-message: "&aYeet!"
+type-particles: FIREWORKS_SPARK
+number-particles: 12
