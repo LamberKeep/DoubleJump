@@ -1,7 +1,3 @@
-## Discription
-
-DoubleJump is Spigot plugin on 1.12.2. Plugin allows players to double jump on hub servers. 
-
 ## Permissions
 
 doublejump.jump - Allows to double jump.
