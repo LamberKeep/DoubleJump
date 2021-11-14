@@ -1,14 +1,15 @@
+## Description
+
+DoubleJump is plugin, as the name suggests, allows players to do "double jumps" in hubs and lobbies.
+
+Thanks Fabricio20 for the plugin idea.
+
 ## Permissions
 
-doublejump.jump - Allows to use admins commands.
+doublejump.jump - Allows to double jump.
 
-doublejump.admin - Allows to double jump.
+doublejump.admin - Allows to use admins commands.
 
-## Configuration
-reload-message: "&aPlugin config reloaded!"
+## Commands
 
-jump-message: "&aYeet!"
-
-type-particles: FIREWORKS_SPARK # List of particles: https://helpch.at/docs/1.12.2/org/bukkit/Particle.html
-
-number-particles: 12
+/doublejump reload - reloads config file (doublejump.admin)

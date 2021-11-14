@@ -1,4 +1,18 @@
-reload-message: "&aPlugin config reloaded!"
+reload-message: "&8[&2DoubleJump&8] &aConfiguration reloaded!"
+
+permission-message: "&cYou dont have permission to do that!"
+
+# Jump power multiplier (integer only).
+jump-force: 1
+
+# Use "" for disable.
 jump-message: "&aYeet!"
-type-particles: FIREWORKS_SPARK
-number-particles: 12
+
+# List of sounds: https://helpch.at/docs/1.12.2/org/bukkit/Sound.html
+jump-sound: ENTITY_FIREWORK_LAUNCH
+
+# List of particles: https://helpch.at/docs/1.12.2/org/bukkit/Particle.html
+particles-type: CLOUD
+
+# Recommends: Don't use a large number, that can cause server lags.
+particles-quality: 12

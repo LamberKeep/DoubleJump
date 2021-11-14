@@ -1,5 +1,5 @@
 name: DoubleJump
-version: 1.1.5
+version: 1.1.6
 description: This plugin allows your players to use "double jump" in hub. (thanks Fabricio20 for the idea)
 author: LamberKeep
 main: com.myvnc.exo.Main
@@ -7,10 +7,6 @@ main: com.myvnc.exo.Main
 commands:
   doublejump:
     description: DoubleJump commands
-    aliases: [dj]
-    #permission: doublejump.admin
-    #permission-message: You do not have permission...
-    #usage: /doublejump <jump|reload>
 
 permissions:
   doublejump.admin:
