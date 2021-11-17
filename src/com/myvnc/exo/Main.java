@@ -1,10 +1,11 @@
 package com.myvnc.exo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -19,22 +20,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.md_5.bungee.api.ChatColor;
 
-public class Main extends JavaPlugin implements Listener, TabCompleter {
+public class Main extends JavaPlugin implements TabCompleter, Listener {
+	
+    HashMap<String, Long> cooldown = new HashMap<>(); // cooldown for jumps
+    HashMap<String, Boolean> inAir = new HashMap<>(); // event check
 	
 	@Override
 	public void onEnable() {
 		this.saveDefaultConfig();
 		getServer().getPluginManager().registerEvents(this, this);
 	}
-
-	@Override
-	public void onDisable() {
-	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (label.equalsIgnoreCase("doublejump")) {	
 			if (!sender.hasPermission("doublejump.admin")) {
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("permission-message")));
+				if (!this.getConfig().getString("messages.permission").isEmpty()) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("messages.permission")));
 				return true;
 			}
 			if (args.length == 0) {
@@ -42,49 +42,61 @@ public class Main extends JavaPlugin implements Listener, TabCompleter {
 			} else {
 				if (args[0].equalsIgnoreCase("reload")) {
 					this.reloadConfig();
-					sender.sendMessage(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("reload-message")));
+					if (!this.getConfig().getString("messages.reloaded").isEmpty()) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("messages.reloaded")));
+					for(Player p : Bukkit.getOnlinePlayers()){
+						if (p.hasPermission("doublejump.jump") && p.getGameMode() == GameMode.SURVIVAL) {
+							p.setAllowFlight(false);
+							p.setFlying(false);
+						}
+					}
 				}
 			}
 		}
 		return false;
 	}
 	
-	@EventHandler
-	public void onJump(PlayerMoveEvent e) {
-		Player p = e.getPlayer();
-        if (p.getGameMode() == GameMode.CREATIVE) return;
-        if (p.isFlying()) return;
-        if (p.getLocation().subtract(0.0, 1.0D, 0.0D).getBlock().getType() != Material.AIR) {
-        	p.setAllowFlight(true);
-        }
-	}
-
-	@EventHandler
-	public void onFly(PlayerToggleFlightEvent e) {
-		Player p = e.getPlayer();
-		if (p.hasPermission("doublejump.jump") && p.getGameMode () == GameMode.ADVENTURE) {				
-        	e.setCancelled(true);
-			p.setAllowFlight(false);
-	        p.setFlying(false);
-	        p.spawnParticle(Particle.valueOf(this.getConfig().getString("particles-type")), p.getLocation(), this.getConfig().getInt("particles-quality"));
-	        p.playSound(p.getLocation(), Sound.valueOf(this.getConfig().getString("jump-sound")), 1f, 1f);
-			p.setVelocity(p.getLocation().getDirection().multiply(this.getConfig().getInt("jump-force")).setY(1));
-			String message = this.getConfig().getString("jump-message");
-			if (!message.isEmpty()) {
-				p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-			}
-		}
-	}
-	
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args){
     	if (cmd.getName().equalsIgnoreCase("doublejump")) {
-    		List<String> list = new ArrayList<String>();   
-    		if (args.length == 1 && sender.hasPermission("doublejump.admin")) {
-	        	list.add("reload");      
-    		}
+    		List<String> list = new ArrayList<String>();
+    		if (args.length == 1 && sender.hasPermission("doublejump.admin")) list.add("reload");      
     		return list;
         }
 		return null;
     }
-
+	
+	@EventHandler
+	public void onMove(PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+		String n = e.getPlayer().getName();
+		if (!getConfig().getStringList("enabled-world").contains(p.getLocation().getWorld().getName())) return;
+		if (p.hasPermission("doublejump.jump") && p.getGameMode() == GameMode.SURVIVAL) {
+			if (p.isOnGround()) {
+				if (System.currentTimeMillis() >= cooldown.getOrDefault(n, (long) 0)) p.setAllowFlight(true);
+				inAir.put(n,false);
+			} else if (this.getConfig().getBoolean("particles.in-trace") && inAir.get(n)) p.spawnParticle(Particle.valueOf(this.getConfig().getString("particle")), p.getLocation(), 0);
+		}
+	}
+	
+	@EventHandler
+	public void onFly(PlayerToggleFlightEvent e) {
+		Player p = e.getPlayer();
+		String n = e.getPlayer().getName();
+		if (!getConfig().getStringList("enabled-world").contains(p.getLocation().getWorld().getName())) return;
+		if (p.hasPermission("doublejump.jump") && p.getGameMode() == GameMode.SURVIVAL) {
+			cooldown.put(n, System.currentTimeMillis() + 1500);
+			inAir.put(n,true);
+			e.setCancelled(true);
+			p.setAllowFlight(false);
+	        p.setFlying(false);
+	        p.playSound(p.getLocation(), Sound.valueOf(this.getConfig().getString("sound")), 1f, 1f);
+			p.setVelocity(p.getLocation().getDirection().multiply(this.getConfig().getDouble("jump-forces.forward")).setY(this.getConfig().getDouble("jump-forces.up")));
+			if (!this.getConfig().getString("messages.jump").isEmpty()) p.sendMessage(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("messages.jump")));
+			if (this.getConfig().getBoolean("particles.in-start")) for (int i = 0; i < this.getConfig().getInt("count"); i++) p.spawnParticle(Particle.valueOf(this.getConfig().getString("particle")), getRandomRange(-1, 1)+p.getLocation().getX(), getRandomRange(-1, 1)+p.getLocation().getY()-0.5, getRandomRange(-1, 1)+p.getLocation().getZ(), 0); // setting particle count to zero removes their velocity (idk why)
+		}
+	}
+	
+	public double getRandomRange(double min, double max) {
+	    return (double) ((Math.random() * (max - min)) + min);
+	}
+	
 }
