@@ -58,7 +58,7 @@ public class Main extends JavaPlugin implements TabCompleter, Listener {
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args){
     	if (cmd.getName().equalsIgnoreCase("doublejump")) {
     		List<String> list = new ArrayList<String>();
-    		if (args.length == 1 && sender.hasPermission("doublejump.admin")) list.add("reload");      
+    		if (args.length == 1 && sender.hasPermission("doublejump.admin")) list.add("reload");
     		return list;
         }
 		return null;
@@ -68,12 +68,13 @@ public class Main extends JavaPlugin implements TabCompleter, Listener {
 	public void onMove(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
 		String n = e.getPlayer().getName();
+		Double s = 0.2;
 		if (!getConfig().getStringList("enabled-world").contains(p.getLocation().getWorld().getName())) return;
 		if (p.hasPermission("doublejump.jump") && p.getGameMode() == GameMode.SURVIVAL) {
 			if (p.isOnGround()) {
 				if (System.currentTimeMillis() >= cooldown.getOrDefault(n, (long) 0)) p.setAllowFlight(true);
 				inAir.put(n,false);
-			} else if (this.getConfig().getBoolean("particles.in-trace") && inAir.get(n)) p.spawnParticle(Particle.valueOf(this.getConfig().getString("particle")), p.getLocation(), 0);
+			} else if (this.getConfig().getBoolean("trace.enabled") && inAir.get(n)) for (int i = 0; i < this.getConfig().getInt("trace.count"); i++) p.spawnParticle(Particle.valueOf(this.getConfig().getString("trace.particle")),p.getLocation(), 0, getRandomRange(-s,s), getRandomRange(-s,s), getRandomRange(-s,s)); // in-trace
 		}
 	}
 	
@@ -81,6 +82,7 @@ public class Main extends JavaPlugin implements TabCompleter, Listener {
 	public void onFly(PlayerToggleFlightEvent e) {
 		Player p = e.getPlayer();
 		String n = e.getPlayer().getName();
+		Double s = 0.2;
 		if (!getConfig().getStringList("enabled-world").contains(p.getLocation().getWorld().getName())) return;
 		if (p.hasPermission("doublejump.jump") && p.getGameMode() == GameMode.SURVIVAL) {
 			cooldown.put(n, System.currentTimeMillis() + 1500);
@@ -88,10 +90,10 @@ public class Main extends JavaPlugin implements TabCompleter, Listener {
 			e.setCancelled(true);
 			p.setAllowFlight(false);
 	        p.setFlying(false);
-	        p.playSound(p.getLocation(), Sound.valueOf(this.getConfig().getString("sound")), 1f, 1f);
 			p.setVelocity(p.getLocation().getDirection().multiply(this.getConfig().getDouble("jump-forces.forward")).setY(this.getConfig().getDouble("jump-forces.up")));
+	        if (!this.getConfig().getString("sound").isEmpty()) p.playSound(p.getLocation(), Sound.valueOf(this.getConfig().getString("sound")), 1f, 1f);
 			if (!this.getConfig().getString("messages.jump").isEmpty()) p.sendMessage(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("messages.jump")));
-			if (this.getConfig().getBoolean("particles.in-start")) for (int i = 0; i < this.getConfig().getInt("count"); i++) p.spawnParticle(Particle.valueOf(this.getConfig().getString("particle")), getRandomRange(-1, 1)+p.getLocation().getX(), getRandomRange(-1, 1)+p.getLocation().getY()-0.5, getRandomRange(-1, 1)+p.getLocation().getZ(), 0); // setting particle count to zero removes their velocity (idk why)
+			if (this.getConfig().getBoolean("start.enabled")) for (int i = 0; i < this.getConfig().getInt("start.count"); i++) p.spawnParticle(Particle.valueOf(this.getConfig().getString("start.particle")),p.getLocation(), 0, getRandomRange(-s,s), getRandomRange(-s,s), getRandomRange(-s,s)); // in-start
 		}
 	}
 	

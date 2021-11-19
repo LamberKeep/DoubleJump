@@ -4,25 +4,26 @@ messages:
   permission: "&cYou dont have permission to do that!"
   jump: "&aYeet!"
 
-# Spreading particle type.
-particles:
-  in-start: true
-  in-trace: true
+# List of all particles: https://helpch.at/docs/1.12.2/org/bukkit/Particle.html
+# Particles when the player double jump.
+start:
+  enabled: true
+  particle: CLOUD
+  count: 12
+# Particles behind the player after double jump.
+trace:
+  enabled: true
+  particle: FLAME
+  count: 3
 
+# List of all sounds: https://helpch.at/docs/1.12.2/org/bukkit/Sound.html
+# Use "" to remove.
+sound: ENTITY_FIREWORK_LAUNCH
+  
 # Jump forces multipliers.
 jump-forces:
   forward: 1.3
   up: 1.0
-
-# Particle count in-start spreading type. It doesn't matter if they are disabled.
-# Recommends: Don't use large numbers, that can cause server lags!
-count: 12
-
-# List of all particles: https://helpch.at/docs/1.12.2/org/bukkit/Particle.html
-particle: CLOUD
-
-# List of all sounds: https://helpch.at/docs/1.12.2/org/bukkit/Sound.html
-sound: ENTITY_FIREWORK_LAUNCH
 
 # Worlds in which the plugin will work.
 enabled-world:

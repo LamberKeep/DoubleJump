@@ -6,9 +6,9 @@ Thanks Fabricio20 for the plugin idea.
 
 ## Permissions
 
-doublejump.jump - Allows to double jump.
+doublejump.jump - Allows to double jump. Setting this permission to false may requires the flight to be disabled. Bear in mind.
 
-doublejump.admin - Allows to use admins commands.
+doublejump.admin - Allows to use the reload command.
 
 ## Commands
 
